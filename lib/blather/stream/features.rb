@@ -33,7 +33,9 @@ class Stream
       end
 
       @idx = @idx ? @idx+1 : 0
-      if stanza = @features.children[@idx]
+      stanza= @features.at_xpath("tls:starttls",{"tls" => "urn:ietf:params:xml:ns:xmpp-tls"})
+      stanza||= @features.children[@idx]
+      if stanza
         if stanza.namespaces['xmlns'] && (klass = self.class.from_namespace(stanza.namespaces['xmlns']))
           @feature = klass.new(
             @stream,
