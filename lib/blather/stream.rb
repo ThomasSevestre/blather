@@ -50,9 +50,6 @@ module Blather
   class Stream < EventMachine::Connection
     # Connection not found
     class NoConnection < RuntimeError; end
-    class ConnectionFailed < RuntimeError; end
-    class ConnectionTimeout < RuntimeError; end
-
     # @private
     STREAM_NS = 'http://etherx.jabber.org/streams'
     attr_accessor :password
@@ -153,10 +150,10 @@ module Blather
     def connection_completed
       if @connect_timeout
         @connect_timer = EM::Timer.new @connect_timeout do
-          raise ConnectionTimeout, "Stream timed out after #{@connect_timeout} seconds." unless started?
+          Blather.logger.info("#{@jid}: stream startup timed out, closing connection")
+          close_connection
         end
       end
-      @connected = true
       start
     end
 
@@ -188,13 +185,13 @@ module Blather
     # @private
     def post_init
       @inited = true
+      Blather.logger.info("#{@jid}: connection established")
     end
 
     # Called by EM when the connection is closed
     # @private
     def unbind
       raise NoConnection unless @inited
-      raise ConnectionFailed unless @connected
 
       @parser.finish
 
@@ -257,7 +254,9 @@ module Blather
 
     # @private
     def ready!
+      Blather.logger.info("#{@jid}: connection ready")
       @state = :started
+      @connect_timer.cancel if @connect_timer
       @receiver = @client
       @client.post_init self, @jid
     end
