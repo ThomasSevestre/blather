@@ -37,20 +37,24 @@ class Stream
       stanza||= @features.children[@idx]
       if stanza
         if stanza.namespaces['xmlns'] && (klass = self.class.from_namespace(stanza.namespaces['xmlns']))
-          @feature = klass.new(
-            @stream,
-            proc {
-              if (klass == Blather::Stream::Register && stanza = feature?(:mechanisms))
-                @idx = @features.children.index(stanza)
-                @feature = Blather::Stream::SASL.new @stream, proc { next! }, @fail
-                @feature.receive_data stanza
-              else
-                next!
-              end
-            },
-            (klass == Blather::Stream::SASL && feature?(:register)) ? proc { next! } : @fail
-          )
-          @feature.receive_data stanza
+          if @stream.authentified && klass == Blather::Stream::Register
+            next!
+          else
+            @feature = klass.new(
+              @stream,
+              proc {
+                if (klass == Blather::Stream::Register && stanza = feature?(:mechanisms))
+                  @idx = @features.children.index(stanza)
+                  @feature = Blather::Stream::SASL.new @stream, proc { next! }, @fail
+                  @feature.receive_data stanza
+                else
+                  next!
+                end
+              },
+              (klass == Blather::Stream::SASL && feature?(:register)) ? proc { next! } : @fail
+            )
+            @feature.receive_data stanza
+          end
         else
           next!
         end

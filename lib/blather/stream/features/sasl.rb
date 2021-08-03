@@ -34,6 +34,7 @@ class Stream
       when 'failure'
         next!
       when 'success'
+        @stream.authentified= true
         @stream.start
       else
         if self.respond_to?(stanza.element_name)

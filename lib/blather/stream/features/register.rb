@@ -17,6 +17,7 @@ module Blather
         if error_node
           fail!(BlatherError.new(stanza))
         elsif stanza['type'] == 'result' && (stanza.content.empty? || stanza.children.find { |v| v.element_name == "query" })
+          @stream.authentified= true
           succeed!
         else
           @stream.send register_query

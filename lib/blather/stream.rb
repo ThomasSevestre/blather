@@ -54,6 +54,7 @@ module Blather
     STREAM_NS = 'http://etherx.jabber.org/streams'
     attr_accessor :password
     attr_reader :jid, :authcid
+    attr_accessor :authentified
 
     # Start the stream between client and server
     #
