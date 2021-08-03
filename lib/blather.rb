@@ -87,24 +87,12 @@ module Blather
 
   class << self
 
-    # Default logger level. Any internal call to log() will forward the log message to
-    # the default log level
-    attr_accessor :default_log_level
-
     def logger
-      @@logger ||= Logger.new($stdout).tap {|logger| logger.level = Logger::INFO }
+      @@logger ||= Logger.new($stdout, level: Logger::INFO)
     end
 
     def logger=(logger)
       @@logger = logger
-    end
-
-    def default_log_level
-      @default_log_level ||= :debug # by default is debug (as it used to be)
-    end
-
-    def log(message)
-      logger.send self.default_log_level, message
     end
 
   end

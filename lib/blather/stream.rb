@@ -126,7 +126,7 @@ module Blather
     # @param [#to_xml, #to_s] stanza the stanza to send over the wire
     def send(stanza)
       data = stanza.respond_to?(:to_xml) ? stanza.to_xml(:save_with => Nokogiri::XML::Node::SaveOptions::AS_XML) : stanza.to_s
-      Blather.log "SENDING: (#{caller[1]}) #{stanza}"
+      Blather.logger.debug "SENDING: (#{caller[1]}) #{stanza}" if Blather.logger.level <= Logger::DEBUG
       EM.next_tick { send_data data }
     end
 
@@ -175,7 +175,7 @@ module Blather
       # EM is supposed to close the connection when this returns false,
       # but it only does that for inbound connections, not when we
       # make a connection to another server.
-      Blather.log "Checking SSL cert: #{pem}"
+      Blather.logger.debug "Checking SSL cert: #{pem}" if Blather.logger.level <= Logger::DEBUG
       return true unless @store
       @store.trusted?(pem).tap do |trusted|
         close_connection unless trusted
@@ -205,7 +205,7 @@ module Blather
     # Called by the parser with parsed nodes
     # @private
     def receive(node)
-      Blather.log "RECEIVING (#{node.element_name}) #{node}"
+      Blather.logger.debug "RECEIVING (#{node.element_name}) #{node}" if Blather.logger.level <= Logger::DEBUG
 
       if node.namespace && node.namespace.prefix == 'stream'
         case node.element_name
@@ -233,7 +233,7 @@ module Blather
     # Ensure the JID gets attached to the client
     # @private
     def jid=(new_jid)
-      Blather.log "USING JID: #{new_jid}"
+      Blather.logger.debug "USING JID: #{new_jid}" if Blather.logger.level <= Logger::DEBUG
       @jid = JID.new new_jid
     end
 
